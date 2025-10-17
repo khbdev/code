@@ -1,21 +1,21 @@
 package main
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 
-func sayHi(n int){
-for i := 0; i < 10; i++ {
-		if n == 0 {
-		return
-	}
-	fmt.Println("Hello 1")
-	sayHi(n -1)
-}
+type  User struct {
+    Name string `json:"name"`
+    Age int `json:"age"`
 }
 
 func main(){
+data := `{"name": "Azizbek", "age": 17}`
+var u User
 
-for i := 0; i < 10; i++ {
-	sayHi(3)
-}
+json.Unmarshal([]byte(data), &u)
+fmt.Println("Name", u.Name)
+fmt.Println("Age", u.Age)
 }
