@@ -1,92 +1,46 @@
 package main
 
 import (
-	"errors"
 	"fmt"
+	"sync"
+
+
 )
 
-// 🔹 User struct
-type User struct {
-	ID    int
-	Name  string
-	Email string
+
+type Job struct {
+	ID int
+	Name string
 }
 
-// 🔹 In-memory storage
-var users = make(map[int]User)
-var lastID = 0
 
-// 🔹 Create
-func CreateUser(name, email string) User {
-	lastID++
-	user := User{
-		ID:    lastID,
-		Name:  name,
-		Email: email,
+
+func worker(id int, jobs <-chan Job, wg *sync.WaitGroup){
+	defer wg.Done()
+
+	for job := range jobs {
+		fmt.Printf("Worker %d is processing job %d and name  %s\n", id, job.ID, job.Name)
 	}
-	users[user.ID] = user
-	return user
 }
 
-// 🔹 Get
-func GetUser(id int) (User, error) {
-	user, exists := users[id]
-	if !exists {
-		return User{}, errors.New("user not found")
-	}
-	return user, nil
-}
 
-// 🔹 Update
-func UpdateUser(id int, name, email string) (User, error) {
-	user, err := GetUser(id)
-	if err != nil {
-		return User{}, err
-	}
-	user.Name = name
-	user.Email = email
-	users[id] = user
-	return user, nil
-}
+func main(){
+	numberWorker := 4
+	numberJobs := 10
 
-// 🔹 Delete
-func DeleteUser(id int) error {
-	_, err := GetUser(id)
-	if err != nil {
-		return err
-	}
-	delete(users, id)
-	return nil
-}
+	jobs := make(chan Job, numberJobs)
 
-// 🔹 Main function (test)
-func main() {
-	// Create
-	u1 := CreateUser("Azizbek", "aziz@example.com")
-	u2 := CreateUser("Ali", "ali@example.com")
-	fmt.Println("Created Users:", u1, u2)
+	var wg sync.WaitGroup
 
-	// Get
-	u, err := GetUser(1)
-	if err == nil {
-		fmt.Println("Get User 1:", u)
+	wg.Add(numberWorker)
+	for i := 0; i < numberWorker; i++ {
+		go worker(i, jobs, &wg)
 	}
 
-	// Update
-	updatedUser, err := UpdateUser(2, "Ali Updated", "ali_new@example.com")
-	if err == nil {
-		fmt.Println("Updated User 2:", updatedUser)
+	for i := 0; i < numberJobs; i++ {
+		jobs <- Job{ID: i, Name: "Azizbek"}
 	}
+	close(jobs)
 
-	// Delete
-	err = DeleteUser(1)
-	if err == nil {
-		fmt.Println("Deleted User 1")
-	}
-
-	// Try to get deleted user
-	_, err = GetUser(1)
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
+	wg.Wait()
 }
