@@ -2,18 +2,26 @@ package main
 
 import (
 	"fmt"
-	"time"
+	"sync"
 )
 
 
 func main(){
 
-	gortina := 5
+var wg sync.WaitGroup
 
-	for i := 0; i < gortina; i++ {
-		go func() {
-			fmt.Println("Salom")
-		}()
-		time.Sleep(1 * time.Second)
-	}
+
+	ch := make(chan  int)
+ wg.Add(2)
+	go func() {
+		ch <- 1
+		wg.Done()
+	}()
+
+	go func() {
+		num := <- ch
+		fmt.Println(num)
+		wg.Done()
+	}()
+	wg.Wait()
 }
