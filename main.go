@@ -1,27 +1,22 @@
 package main
 
-import (
-	"fmt"
-	"sync"
-)
+import "fmt"
+
 
 
 func main(){
+	ch := make(chan int)
 
-var wg sync.WaitGroup
 
+	for i := 1; i <= 3; i++ {
+		go func() {
+			ch <- i
+		}()
+	}
+	close(ch)
 
-	ch := make(chan  int)
- wg.Add(2)
-	go func() {
-		ch <- 1
-		wg.Done()
-	}()
+	sam := <- ch
+	fmt.Println(sam)
 
-	go func() {
-		num := <- ch
-		fmt.Println(num)
-		wg.Done()
-	}()
-	wg.Wait()
+	
 }
