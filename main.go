@@ -2,26 +2,18 @@ package main
 
 import (
 	"fmt"
-	"sync"
+	"time"
 )
-
-func GoruOne(){
-	fmt.Println("Salom")
-}
 
 
 func main(){
 
-var wg sync.WaitGroup
-
-wg.Add(1)
-go func() {
-	wg.Done()
-	GoruOne()
-}()
-
-wg.Wait()
-
-
+for i := 0; i < 4; i++ {
+	go func() {
+		fmt.Println("Hello")
+	}()
+	time.Sleep(1 * time.Second)
+}
+time.Sleep(2 * time.Second)
 
 }
