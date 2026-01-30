@@ -6,27 +6,26 @@ import (
 )
 
 
-func main(){
-	ch1 := make(chan string)
-	ch2 := make(chan string)
-
-
-	go func() {
-		time.Sleep(1 *time.Second)
-		ch1 <- "hello one channel"
-	}()
-
-	go func() {
-		time.Sleep(2 *time.Second)
-		ch2 <- "Hello two channel"
-	}()
-
-	for i := 0; i < 2; i++ {
-		select {
-		case val1 := <- ch1:
-			fmt.Println(val1)
-		case val2 := <- ch2:
-			fmt.Println(val2)
-		}
-	}
+func worker(id int, jobs <-chan int){
+	fmt.Printf("Worker id %d, job %d ni ishlayabdi", id, <-jobs)
+	time.Sleep(1  * time.Second)
 }
+
+
+func main(){
+	jobs := make(chan int)
+
+	for i := 1; i < 3; i++ {
+		go func() {
+			worker(i, jobs)
+		}()
+	}
+
+	for i := 1; i <= 10; i++ {
+		jobs <- i
+	}
+
+	time.Sleep(5 *time.Second)
+}
+
+
