@@ -18,7 +18,9 @@ func main(){
 	jobs := make(chan int)
 
 	for i := 1; i <= 3; i++ {
-		go worker(i, jobs)
+		go func(id int) {
+			worker(id, jobs)
+		}(i)
 	}
 
 	for j := 1; j <= 10; j++ {
