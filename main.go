@@ -20,9 +20,10 @@ var (
 	mu sync.Mutex
 )
 
-func CreateUser(name string, wg *sync.WaitGroup) User {
-	wg.Done()
+func CreateUser(name string, wg *sync.WaitGroup){
+defer	wg.Done()
 	mu.Lock()
+	defer 	mu.Unlock()
 	lastID++
 	user := User {
       ID: lastID,
@@ -30,25 +31,29 @@ func CreateUser(name string, wg *sync.WaitGroup) User {
 	}
 	users = append(users, user)
 	
-	mu.Unlock()
-	return  user
+
+
 }
 
 func main(){
-	var name string
+	names := make([]string, 0, 5)
 	
   
-	for i := 1; i <= 5; i++ {
+	for i := 0; i < 5; i++ {
+		var name string
 		fmt.Print("Name: ", )
 	fmt.Scanln(&name)
+	names = append(names, name)
 	}
 
-	for i := 1; i <= 5; i++ {
+	for i := 0; i < 5; i++ {
 		wg.Add(1)
 		go func(id int) {
-			fmt.Print("Name: ", )
-	fmt.Scanln(&name)
+			CreateUser(names[i], &wg)
+		
 		}(i)
 	}
+		
 	wg.Wait()
+	fmt.Println(users)
 }
