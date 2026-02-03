@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 
 
 type User struct {
@@ -22,3 +24,13 @@ func CreateUser(name string) User {
 	return  user
 }
 
+func main(){
+	var name string
+
+	for i := 1; i <= 5; i++ {
+		fmt.Print("Name: ", )
+	fmt.Scanln(&name)
+	}
+
+	
+}
