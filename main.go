@@ -30,9 +30,11 @@ defer	wg.Done()
 	  Name: name,
 	}
 	users = append(users, user)
-	
+}
 
-
+func getUsers(id int) User {
+	user := users[id]
+	return  user
 }
 
 func main(){
@@ -56,4 +58,9 @@ func main(){
 		
 	wg.Wait()
 	fmt.Println(users)
+  
+	getUsers(1)
+
+
+
 }
