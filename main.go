@@ -2,17 +2,41 @@ package main
 
 import "fmt"
 
-func main() {
-	users := []string{}
+type User struct {
+	Id   int
+	Name string
+}
 
-	for i := 0; i < 5; i++ {
-		users = append(users, "Azizbek")
-		users = append(users, "Soliha")
-		users = append(users, "Ali")
-		users = append(users, "Muslima")
+var users []User
+var lastId int = 0
+
+func AddliSt(name string) {
+	lastId++
+	user := User{
+		Id:   lastId,
+		Name: name,
 	}
-
-	fmt.Println("Users", users)
-	fmt.Println("uzunlik", len(users))
-
+	users = append(users, user)
+	fmt.Println("Create SuccessFull")
+}
+func ListUsers() {
+	fmt.Println(users)
+}
+func getById(id int) (User, bool) {
+	for _, user := range users {
+		if user.Id == id {
+			return user, true
+		}
+	}
+	return User{}, false
+}
+func main() {
+	AddliSt("Azizbek")
+	ListUsers()
+	u, ok := getById(1)
+	if !ok {
+		fmt.Println("Topilmadi")
+		return
+	}
+	fmt.Println(u)
 }
