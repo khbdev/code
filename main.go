@@ -1,9 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 func main(){
-	var name string
+var u string
+fmt.Print("URl: ")
+fmt.Scanln(&u)
 
-	fmt.Print("")
+if !strings.HasPrefix(u, "http") {
+	u = "https://" + u
+}
+
 }
