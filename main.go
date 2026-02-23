@@ -1,17 +1,23 @@
 package main
 
 import (
-	"fmt"
-	"strings"
+	// "fmt"
+	"time"
 )
 
-func main(){
-var u string
-fmt.Print("URl: ")
-fmt.Scanln(&u)
 
-if !strings.HasPrefix(u, "http") {
-	u = "https://" + u
+func Worker(name string){
+	// for i := 1; i <= 3; i++ {
+	//   fmt.Println(name, "Workering", i)
+	//   time.Sleep(time.Second)
+	// }
+	panic("boom")
 }
 
+
+func main(){
+	go Worker("Thread-1")
+	go Worker("Thread-2")
+
+	time.Sleep(4 * time.Second)
 }
