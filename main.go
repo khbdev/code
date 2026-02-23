@@ -1,8 +1,12 @@
-package main
+package code
 
-import "fmt"
+
+
+func Value() int {
+	x := 10
+	return  x
+}
 
 func main(){
-	x := 10
-	fmt.Println(x)
+	Value()
 }
