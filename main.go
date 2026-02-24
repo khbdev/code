@@ -2,32 +2,18 @@ package main
 
 import (
 	"fmt"
-	"runtime"
-	"sync"
+	"os"
 	"time"
 )
 
 
 
-func Worker(id int, wg *sync.WaitGroup){
-	defer wg.Done()
+func main(){
+	fmt.Println("My pid: ", os.Getpid())
+	fmt.Println("Parent PID: ", os.Getppid())
 
-for i := 0; i < 3; i++ {
-	fmt.Println("Worker", id, "iteration", i)
-		time.Sleep(200 * time.Millisecond)
-}
-}
-
-
-func main() {
-	runtime.GOMAXPROCS(1)
-	fmt.Println("Cpu Cores:", runtime.NumCPU())
-
-	var wg sync.WaitGroup
-	for i := 0; i < 5; i++ {
-		wg.Add(1)
-		go Worker(i, &wg)
+	for i := 0; i < 50; i++ {
+		fmt.Println("Alice second: ", i)
+		time.Sleep(1 * time.Second)
 	}
-
-	wg.Wait()
 }
