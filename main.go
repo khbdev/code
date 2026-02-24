@@ -2,18 +2,15 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"time"
+	"os/exec"
 )
 
-
-
 func main(){
-	fmt.Println("My pid: ", os.Getpid())
-	fmt.Println("Parent PID: ", os.Getppid())
-
-	for i := 0; i < 50; i++ {
-		fmt.Println("Alice second: ", i)
-		time.Sleep(1 * time.Second)
+	cmd := exec.Command("bash", "-ls", "ls", "la")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println("error", err)
+		return
 	}
+	fmt.Println(string(out))
 }
