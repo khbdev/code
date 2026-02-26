@@ -1,14 +1,18 @@
 package main
 
 import (
- "fmt"
- "sync"
- "time"
+	"fmt"
+	"sync"
+
+	"time"
 )
+ var mu sync.Mutex
+ var wy sync.WaitGroup
 
 func main() {
  firstTest()
  // secondTest()
+ wy.Wait()
 }
 
 // ---------------------------------------------------------------------------------------
@@ -18,9 +22,14 @@ func main() {
 // berilgan vaqt 5-10 daqiqa
 func firstTest() {
  var orderCount int
+
  for i := 0; i < 1_000_000; i++ {
+	wy.Add(1)
   go func() {
+	mu.Lock()
    orderCount++
+   mu.Unlock()
+   wy.Done()
   }()
  }
 
