@@ -1,41 +1,59 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"sync"
+
+	"time"
 )
 
+func main() {
+//  firstTest()
+ secondTest()
+}
 
-func main(){
-	total := 1_000_000
-	worker := 10
+// ---------------------------------------------------------------------------------------
 
-	chunk := total / worker
+// order count 1_000_000 marta qo'shib chiqqanda boshqa son chiqmoqda.
+// shuni to'gri increment qiladigan qilish kerak.
+// berilgan vaqt 5-10 daqiqa
+func firstTest() {
+ var orderCount int
+ for i := 0; i < 1_000_000; i++ {
+  go func() {
+   orderCount++
+  }()
+ }
 
-	results := make([]int, worker)
+ fmt.Printf("order count: %d\n", orderCount)
+}
 
-	var wg sync.WaitGroup
+// ---------------------------------------------------------------------------------------
 
-	for i := 0; i < worker; i++ {
-		wg.Add(1)
+// agar request 3 soniadan koproq vaqt oladigan bo'lsa, biz kutmay, panic qilishimiz kerak
+// berilgan vaqt 5-10 daqiqa
+func secondTest() {
+	ctx, cancel := context.WithTimeout(context.Background(), 3 * time.Second)
+	defer cancel()
 
-		go func(id int) {
-			defer wg.Done()
-			start := id * chunk
-			end := start + chunk
+	result := make(chan int)
 
-			local := 0
-			for i := start; i < end; i++ {
-				local++
-			}
-			results[id] = local
-		}(i)
+	go func() {
+		result <- simulateRequest()
+	}()
+
+	select {
+	case res := <-result:
+		fmt.Println("simuleRequest in response: ", res)
+
+	case <-ctx.Done():
+		fmt.Println("3 time seconddan oshib ketdi")
 	}
-	wg.Wait()
 
-	sum := 0
-	for _, v := range results {
-		sum+=v
-	}
-	fmt.Println("Natija: ", sum)
+
+}
+
+func simulateRequest() int {
+ time.Sleep(time.Second * 5)
+ return 1
 }
