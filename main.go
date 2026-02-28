@@ -1,15 +1,14 @@
 package main
 
 import (
-	"context"
-	"fmt"
+ "fmt"
 
-	"time"
+ "time"
 )
 
 func main() {
-//  firstTest()
- secondTest()
+ //firstTest()
+  secondTest()
 }
 
 // ---------------------------------------------------------------------------------------
@@ -33,24 +32,24 @@ func firstTest() {
 // agar request 3 soniadan koproq vaqt oladigan bo'lsa, biz kutmay, panic qilishimiz kerak
 // berilgan vaqt 5-10 daqiqa
 func secondTest() {
-	ctx, cancel := context.WithTimeout(context.Background(), 3 * time.Second)
-	defer cancel()
-
-	result := make(chan int)
-
-	go func() {
-		result <- simulateRequest()
-	}()
-
-	select {
-	case res := <-result:
-		fmt.Println("simuleRequest in response: ", res)
-
-	case <-ctx.Done():
-		fmt.Println("3 time seconddan oshib ketdi")
-	}
+ ctx, cancel := context.WithTimeOut(context.Backround(), 5 *time.Second)
+ defer cancel()
+ 
+ result := make(chan int)
+ 
 
 
+ go func() {
+	 result <- simulateRequest()
+ }()
+ 
+ select {
+ case res := <-result:
+ fmt.Println("malumot: ", res)
+ case <-ctx.Done():
+ fmt.Println("vaqt yetmadi")
+ }
+ 
 }
 
 func simulateRequest() int {
