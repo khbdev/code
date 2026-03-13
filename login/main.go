@@ -6,5 +6,5 @@ import "fmt"
 
 
 func main(){
-	fmt.Println("Login-Branch")
+	fmt.Println("Login")
 }
