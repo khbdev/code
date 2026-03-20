@@ -2,30 +2,47 @@ package main
 
 import (
 	"fmt"
-	"runtime"
-	"sync"
+	"net/http"
 	"time"
 )
 
 
-func main(){
-	var wg sync.WaitGroup
 
-fmt.Println("Boshlanishda Gorutinlar soni: ", runtime.NumGoroutine())
-for i := 0; i < 1000; i++ {
-	wg.Add(1)
+func LoggerMiddleware(next  http.HandlerFunc) http.HandlerFunc {
+	return  func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now
 
-	go func(id int) {
-		defer wg.Done()
-		fmt.Printf("gorutina id  %d\n", id)
-	}(i)
-	time.Sleep(100 * time.Millisecond)
-	fmt.Println("Ishlayotganda goroutine soni:", runtime.NumGoroutine())
+		method := r.Method
+		path := r.URL.Path
 
-	wg.Wait()
+		next(w, r)
 
+		latency := time.Since(start())
 
+		fmt.Printf("Mathod %d, Path %d, Latency %d", method, path, latency)
+	}
 }
-	fmt.Println("Gorutinlar ishini tugatdi")
-		fmt.Println("Tugagandan keyin goroutine soni:", runtime.NumGoroutine())
+
+
+func PanicMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return  func(w http.ResponseWriter, r *http.Request) {
+		defer func ()  {
+			if err := recover(); err != nil {
+				fmt.Println("Panic ushlab qolidi")
+				http.Error(w, "Error", http.StatusInternalServerError)
+			}
+		}()
+		next(w, r)
+	}
+}
+
+func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return  func(w http.ResponseWriter, r *http.Request) {
+		key := r.Form.Get("X-Api-Key")
+		if key != "secret123" {
+			http.Error(w, "Key yoq", http.StatusUnauthorized)
+			return 
+		}
+		next(w, r)
+	}
 }
