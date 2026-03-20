@@ -1,48 +1,65 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
 
+func main(){
 
-func LoggerMiddleware(next  http.HandlerFunc) http.HandlerFunc {
-	return  func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now
+	mux := http.NewServeMux()
 
-		method := r.Method
-		path := r.URL.Path
 
-		next(w, r)
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "Salom")
+	})
 
-		latency := time.Since(start())
+	mux.HandleFunc("/salom", func(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
 
-		fmt.Printf("Mathod %d, Path %d, Latency %d", method, path, latency)
+	log.Println("request keldi")
+
+	time.Sleep(8 * time.Second)
+
+	log.Println("request tugadi")
+
+	fmt.Fprint(w, "Request tugadi")
+})
+
+
+	sigCh := make(chan os.Signal, 1)
+
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+
+
+	server := &http.Server{
+		Addr: ":8084",
+		Handler: mux,
 	}
+
+	go func() {
+		fmt.Println("Server ishga tushdi Port :8084")
+		server.ListenAndServe()
+	}()
+
+	sig := <-sigCh
+	fmt.Println("Signal keldi: ", sig)
+
+	fmt.Println("ShutDown ishga tushdi 10s")
+
+	ctx, cance := context.WithTimeout(context.Background(), 10 * time.Second)
+	defer cance()
+
+	server.Shutdown(ctx)
+	server.Close()
+
+	fmt.Println("Server ochdi !")
 }
 
-
-func PanicMiddleware(next http.HandlerFunc) http.HandlerFunc {
-	return  func(w http.ResponseWriter, r *http.Request) {
-		defer func ()  {
-			if err := recover(); err != nil {
-				fmt.Println("Panic ushlab qolidi")
-				http.Error(w, "Error", http.StatusInternalServerError)
-			}
-		}()
-		next(w, r)
-	}
-}
-
-func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
-	return  func(w http.ResponseWriter, r *http.Request) {
-		key := r.Form.Get("X-Api-Key")
-		if key != "secret123" {
-			http.Error(w, "Key yoq", http.StatusUnauthorized)
-			return 
-		}
-		next(w, r)
-	}
-}
