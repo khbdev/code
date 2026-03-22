@@ -1,65 +1,62 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"log"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 )
 
 
-func main(){
 
-	mux := http.NewServeMux()
+func LoggerMiddleware(next http.HandlerFunc) http.HandlerFunc {
+    return  func(w http.ResponseWriter, r *http.Request) {
+        start := time.Now()
 
+        method := r.Method
+        path := r.URL.Path
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "Salom")
-	})
+        next(w, r)
 
-	mux.HandleFunc("/salom", func(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
+        latency := time.Since(start)
 
-	log.Println("request keldi")
-
-	time.Sleep(8 * time.Second)
-
-	log.Println("request tugadi")
-
-	fmt.Fprint(w, "Request tugadi")
-})
-
-
-	sigCh := make(chan os.Signal, 1)
-
-	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
-
-
-	server := &http.Server{
-		Addr: ":8084",
-		Handler: mux,
-	}
-
-	go func() {
-		fmt.Println("Server ishga tushdi Port :8084")
-		server.ListenAndServe()
-	}()
-
-	sig := <-sigCh
-	fmt.Println("Signal keldi: ", sig)
-
-	fmt.Println("ShutDown ishga tushdi 10s")
-
-	ctx, cance := context.WithTimeout(context.Background(), 10 * time.Second)
-	defer cance()
-
-	server.Shutdown(ctx)
-	server.Close()
-
-	fmt.Println("Server ochdi !")
+        fmt.Printf("Mathod %d, Path %d, Latency %d", method, path, latency)
+    }
 }
 
+func ResoverMiddleware(next http.HandlerFunc) http.HandlerFunc  {
+    return  func(w http.ResponseWriter, r *http.Request) {
+        defer func ()  {
+            if err := recover(); err != nil {
+                fmt.Println("Panic ushlab qolindi")
+                http.Error(w, "server error", http.StatusInternalServerError)
+            }
+        }()
+        next(w, r)
+    }
+}
+
+func  AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
+    return  func(w http.ResponseWriter, r *http.Request) {
+        key := r.RemoteAddr
+
+        if key != "secret123" {
+            http.Error(w, "Xatolik", http.StatusBadRequest)
+            return 
+        }
+        next(w, r)
+    }
+}
+   
+
+
+
+
+
+func helloHandler(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintln(w, "Hello!")
+}
+
+func main() {
+    http.HandleFunc("/", helloHandler)
+    http.ListenAndServe(":8080", nil)
+}
