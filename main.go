@@ -1,22 +1,49 @@
 package main
 
-import "fmt"
-
-type User struct {
-	Name string
-	Age int
-}
+import (
+	"fmt"
+	"sync"
+)
 
 
-var users []User
 
 func main(){
-for i := 0; i < 1_000_000_000; i++ {
-		users = append(users, User{Name: "Azizbek", Age: 17})
-}
+	total := 1_000_000
 
-for _, v := range users {
-	fmt.Println(v.Name)
-	fmt.Println(v.Age)
+	workers := 10
+
+
+	chunk := total / workers
+
+
+	result := make([]int, workers)
+
+
+	var wg sync.WaitGroup
+
+	for i := 0; i < workers; i++ {
+		wg.Add(1)
+
+		go func(id int) {
+			defer wg.Done()
+
+			start := id * chunk
+			end := start + chunk
+
+			local := 0
+
+			for i := start; i < end; i++ {
+				local++
+			}
+			result[id] = local
+		}(i)
+	}
+	wg.Wait()
+
+	sum := 0
+
+for _, v := range result {
+	sum+=v
 }
+fmt.Println("Natija: ", sum)
 }
